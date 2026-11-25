@@ -1,0 +1,11 @@
+{
+  "name": "reseaux-batiazur",
+  "private": true,
+  "type": "module",
+  "description": "Réseaux sociaux automatiques Bati Azur (Facebook + Instagram)",
+  "dependencies": {
+    "@fontsource/quicksand": "^5.2.0",
+    "@resvg/resvg-js": "^2.6.2",
+    "satori": "^0.12.2"
+  }
+}
