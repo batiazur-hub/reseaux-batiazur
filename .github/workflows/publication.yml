@@ -1,5 +1,5 @@
 name: Bati Azur (publication automatique)
-# Chaque matin, toute l'année : story « Météo piscine » (filtration conseillée, hivernage actif,
+# Chaque matin, toute l'année : story + publication Facebook « Météo piscine » (filtration conseillée, hivernage actif,
 # alertes gel / canicule / orage) sur Facebook et Instagram. Tourne dans le cloud GitHub.
 # Créneaux de secours : un jour déjà publié n'est jamais republié.
 on:
@@ -12,6 +12,7 @@ on:
       moment: { description: "meteo", required: true, default: "meteo" }
       essai: { description: "Essai : préparer sans publier", type: boolean, default: false }
       forcer: { description: "Republier même si déjà fait aujourd'hui", type: boolean, default: false }
+      sans_story: { description: "Publication seule, sans la story", type: boolean, default: false }
 permissions:
   contents: write
 concurrency: { group: batiazur, cancel-in-progress: false }
@@ -37,7 +38,7 @@ jobs:
           if [ "${{ inputs.forcer }}" != "true" ] && [ -f src/historique.json ] && grep -q "\"$J-$MOMENT\"" src/historique.json; then echo "oui=1" >> $GITHUB_OUTPUT; echo "Déjà publié aujourd'hui."; fi
       - name: Préparer
         if: ${{ !steps.fait.outputs.oui }}
-        run: node src/lancer.mjs preparer "$MOMENT"
+        run: node src/lancer.mjs preparer "$MOMENT" ${{ inputs.sans_story && '--sans-story' || '' }}
       - name: Mettre les images en ligne (branche batiazur-images)
         if: ${{ !steps.fait.outputs.oui }}
         run: |

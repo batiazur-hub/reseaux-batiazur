@@ -27,13 +27,18 @@ if (commande === "preparer") {
     const m = opt("essai-meteo") ? JSON.parse(opt("essai-meteo")) : await meteoDuJour();
     const f = join(dossier, `${jour}-meteo.png`);
     writeFileSync(f, await a.storyMeteo(m));
-    pub.stories.push(f);
+    if (!opt("sans-story")) pub.stories.push(f);
+    // La même météo en publication sur la page Facebook (pas sur le fil Instagram, réservé aux réalisations).
+    const dateTexte = new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", weekday: "long", day: "numeric", month: "long" }).format(new Date());
+    const fp = join(dossier, `${jour}-meteo-post.png`);
+    writeFileSync(fp, await a.postMeteo(m, dateTexte[0].toUpperCase() + dateTexte.slice(1)));
+    pub.post = { images: [fp], legende: legendeMeteo(m), reseaux: ["facebook"] };
     pub.legende = legendeMeteo(m);
     pub.meteo = m;
     console.log(`Météo ${m.max}° / ${m.min}° · ${m.ciel} · ${m.conseil.valeur} ${m.conseil.detail}${m.conseil.alerte ? " · ALERTE " + m.conseil.type : ""}`);
   } else throw new Error(`moment inconnu : ${moment}`);
   writeFileSync(join(dossier, "publication.json"), JSON.stringify(pub, null, 2));
-  console.log(`✓ préparé : ${pub.stories.length} story(s)`);
+  console.log(`✓ préparé : ${pub.stories.length} story(s)${pub.post ? " + 1 publication" : ""}`);
 
 } else if (commande === "publier") {
   if (histo[cle] && !opt("forcer")) { console.log(`Déjà publié (${cle}), rien à faire.`); process.exit(0); }

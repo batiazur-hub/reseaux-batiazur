@@ -60,7 +60,8 @@ export async function publierBatiAzur(pub, config) {
 
   if (pub.post) {
     const urls = pub.post.images.map(url);
-    if (ig) await essai("post instagram", async () => {
+    const reseaux = pub.post.reseaux || ["facebook", "instagram"];
+    if (ig && reseaux.includes("instagram")) await essai("post instagram", async () => {
       let c;
       if (urls.length === 1) c = (await graph(`${ig}/media`, { image_url: urls[0], caption: pub.post.legende })).id;
       else {
@@ -71,7 +72,7 @@ export async function publierBatiAzur(pub, config) {
       }
       await attendrePret(c); await publierIg(ig, c);
     });
-    await essai("post facebook", async () => {
+    if (reseaux.includes("facebook")) await essai("post facebook", async () => {
       const photos = [];
       for (const u of urls) photos.push((await graph(`${fb}/photos`, { url: u, published: "false" })).id);
       const p = { message: pub.post.legende };

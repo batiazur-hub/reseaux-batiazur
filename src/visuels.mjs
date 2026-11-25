@@ -75,6 +75,31 @@ export class AtelierBatiAzur {
       h("div", { position: "absolute", bottom: 70, fontSize: 30, fontWeight: 600, opacity: 0.8 }, `Bati Azur · Avermes · ${TEL}`)), 1080, 1920);
   }
 
+  /** Météo en publication (1080×1350) : même contenu que la story, mise en page carrée. */
+  postMeteo(m, date) {
+    const carte = (enfants, style = {}) => h("div", { flexDirection: "column", background: "rgba(255,255,255,0.13)", border: "2px solid rgba(255,255,255,0.22)", borderRadius: 34, padding: "30px 38px", ...style }, enfants);
+    return this.png(h("div", { width: 1080, height: 1350, flexDirection: "column", background: `linear-gradient(180deg, #7DAAE0 0%, ${C.bleu} 45%, ${P} 100%)`, color: C.creme, padding: "70px 70px" },
+      motif(1080, 1350, "#FFFFFF", 0.05, 150),
+      h("div", { justifyContent: "space-between", alignItems: "center" }, logo("blanc", 280), h("div", { fontSize: 30, fontWeight: 700, opacity: 0.85 }, date)),
+      h("div", { alignItems: "center", gap: 40, marginTop: 60 },
+        h("div", { fontSize: 230, fontWeight: 700, lineHeight: 1 }, `${m.temp}°`),
+        h("div", { flexDirection: "column", gap: 8 },
+          h("div", { fontSize: 28, fontWeight: 700, letterSpacing: 6, opacity: 0.75 }, "MÉTÉO PISCINE · " + m.ville.toUpperCase()),
+          h("div", { fontSize: 52, fontWeight: 700 }, m.ciel),
+          h("div", { fontSize: 32, fontWeight: 500, opacity: 0.75 }, `Max ${m.max}° · Min ${m.min}°`))),
+      h("div", { flexDirection: "column", gap: 22, marginTop: "auto" },
+        carte([
+          h("div", { fontSize: 24, fontWeight: 700, letterSpacing: 5, opacity: 0.7 }, m.conseil.titre),
+          h("div", { alignItems: "baseline", gap: 24 }, h("div", { fontSize: 104, fontWeight: 700, color: C.jaune }, m.conseil.valeur), h("div", { fontSize: 36, fontWeight: 600 }, m.conseil.detail)),
+        ]),
+        m.conseil.alerte ? h("div", { background: C.jaune, color: C.encre, borderRadius: 28, padding: "24px 34px", fontSize: 34, fontWeight: 700, lineHeight: 1.3 }, m.conseil.alerte) : null,
+        carte([
+          h("div", { flexWrap: "wrap", gap: "12px 0" }, m.villes.map((v) => h("div", { width: "50%", justifyContent: "space-between", paddingRight: 30, fontSize: 32 },
+            h("div", { fontWeight: 700 }, v.nom), h("div", { fontWeight: 500, opacity: 0.85 }, `${v.max}° / ${v.min}°`)))),
+        ], { padding: "24px 38px" }),
+        h("div", { justifyContent: "center", fontSize: 28, fontWeight: 600, opacity: 0.8, marginTop: 6 }, `Une question ? Bati Azur · Avermes · ${TEL}`))));
+  }
+
   /* ---------------------------------------------------------- L'Expert */
   couvertureExpert(sujet, n) {
     return this.png(h("div", { width: 1080, height: 1350, flexDirection: "column", background: C.bleu, color: C.creme, padding: "80px 84px" },
