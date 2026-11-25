@@ -86,7 +86,65 @@ export async function meteoDuJour(date = new Date(), fetcher = fetch) {
   };
 }
 
-export function legendeMeteo(m) {
-  const base = `Météo piscine — Moulins et alentours · ${m.max}°C · ${m.ciel}.\n${m.conseil.titre === "HIVERNAGE ACTIF" ? "Hivernage actif" : "Filtration conseillée"} : ${m.conseil.valeur}, ${m.conseil.detail}.`;
-  return (m.conseil.alerte ? `${base}\n\n${m.conseil.alerte}` : base) + `\n\nUne question ? Bati Azur, 04 70 34 21 96.\n#piscine #moulins #allier #batiazur`;
+// Conseils du jour (tournent chaque jour, selon la saison) et questions pour faire réagir.
+const CONSEILS = {
+  hiver: [
+    "En hivernage actif, un galet de chlore par mois suffit.",
+    "Ne videz jamais votre piscine en hiver : l'eau protège la structure.",
+    "Gardez le niveau d'eau au milieu du skimmer, même en hiver.",
+    "Videz régulièrement les feuilles sur la bâche : leur poids l'abîme.",
+    "Pompe, filtre, électrolyseur : un coup d'œil au local technique une fois par mois évite les surprises.",
+    "Avec un électrolyseur qui se coupe seul en eau froide, l'hivernage actif devient presque sans entretien.",
+  ],
+  saison: [
+    "Le pH idéal se situe entre 7,0 et 7,4 : au-delà, le chlore perd de son efficacité.",
+    "Videz le panier du skimmer chaque semaine, plus souvent après le vent.",
+    "Brossez parois et ligne d'eau une fois par semaine pour éviter les dépôts.",
+    "Ajoutez le pH par petites doses, diluées dans un seau, devant les refoulements.",
+    "Après une grosse baignade, un peu plus de filtration aide l'eau à rester claire.",
+    "Une eau qui verdit ? Brossez, corrigez le pH, traitez puis filtrez 24 h.",
+  ],
+};
+const QUESTIONS = {
+  hiver: [
+    "Et vous, hivernage actif ou passif ?",
+    "Votre piscine passe l'hiver bâchée ou à découvert ?",
+    "Qui a déjà remis sa piscine en route au printemps avec une eau parfaite ?",
+  ],
+  saison: [
+    "Combien d'heures tourne votre filtration en ce moment ?",
+    "Votre eau est à combien de degrés aujourd'hui ?",
+    "Première baignade de la saison, c'est fait ?",
+  ],
+};
+const ACCROCHE = {
+  gel: "❄️ Gel annoncé : protégez votre piscine",
+  canicule: "🔥 Canicule : votre piscine a besoin de vous",
+  orage: "⛈️ Orages annoncés : les bons réflexes pour votre piscine",
+  hivernage: "💧 Météo piscine du jour",
+  saison: "☀️ Météo piscine du jour",
+};
+
+export function legendeMeteo(m, date = new Date()) {
+  const saison = m.conseil.titre === "HIVERNAGE ACTIF" ? "hiver" : "saison";
+  const jourAn = Math.floor((date - new Date(date.getFullYear(), 0, 0)) / 864e5);
+  const conseilJour = CONSEILS[saison][jourAn % CONSEILS[saison].length];
+  const question = QUESTIONS[saison][jourAn % QUESTIONS[saison].length];
+  const villes = m.villes.map((v) => `${v.nom} ${v.max}°`).join(" · ");
+  const lignes = [
+    `${ACCROCHE[m.conseil.type] || ACCROCHE.saison} — ${m.max}°C à Moulins, ${m.ciel.toLowerCase()}.`,
+    "",
+    m.conseil.alerte ? `👉 ${m.conseil.alerte}\n` : null,
+    `${saison === "hiver" ? "Hivernage actif" : "Filtration conseillée"} aujourd'hui : ${m.conseil.valeur}, ${m.conseil.detail}.`,
+    "",
+    `💡 Le conseil du jour : ${conseilJour}`,
+    "",
+    `📍 ${villes}`,
+    "",
+    `${question} Dites-le-nous en commentaire 👇`,
+    "",
+    "Bati Azur, votre pisciniste à Avermes · 04 70 34 21 96",
+    "#piscine #meteo #Moulins #Allier #Vichy #Nevers #Decize #batiazur",
+  ];
+  return lignes.filter((l) => l !== null).join("\n");
 }
