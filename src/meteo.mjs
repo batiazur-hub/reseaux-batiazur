@@ -26,9 +26,20 @@ export async function previsions(fetcher = fetch) {
     daily: "temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max",
     timezone: "Europe/Paris", forecast_days: "2",
   });
-  const r = await fetcher(`https://api.open-meteo.com/v1/forecast?${q}`);
-  if (!r.ok) throw new Error(`Open-Meteo : ${r.status}`);
-  const d = await r.json();
+  // Open-Meteo répond parfois lentement : jusqu'à 5 essais espacés.
+  let d;
+  for (let essai = 1; ; essai++) {
+    try {
+      const r = await fetcher(`https://api.open-meteo.com/v1/forecast?${q}`, { signal: AbortSignal.timeout(30000) });
+      if (!r.ok) throw new Error(`Open-Meteo : ${r.status}`);
+      d = await r.json();
+      break;
+    } catch (e) {
+      if (essai >= 5) throw e;
+      console.warn(`! météo indisponible (${e.message}), nouvel essai dans ${essai * 15} s`);
+      await new Promise((ok) => setTimeout(ok, essai * 15000));
+    }
+  }
   const liste = Array.isArray(d) ? d : [d];
   return VILLES.map((v, i) => {
     const j = liste[i].daily;
